@@ -50,11 +50,11 @@ export default function Profile() {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-20">
+    <div className="max-w-lg mx-auto mt-8 sm:mt-20 px-4 sm:px-0">
       <Card className="bg-card/50 backdrop-blur border-primary/20 shadow-2xl">
         <CardHeader>
-          <CardTitle className="text-2xl font-display">Complete Your Profile</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-display">Complete Your Profile</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             We need a few more details before you can enter the hackathon arena.
           </CardDescription>
         </CardHeader>
@@ -74,7 +74,7 @@ export default function Profile() {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="college"

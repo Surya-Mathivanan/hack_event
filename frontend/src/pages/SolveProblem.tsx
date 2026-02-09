@@ -32,7 +32,7 @@ export default function SolveProblem() {
   const { data: allProblems } = useProblems();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [language, setLanguage] = useState<"python" | "c" | "cpp" | "java">("python");
   const [code, setCode] = useState(LANGUAGES.python.defaultCode);
   const [output, setOutput] = useState<any>(null);
@@ -49,6 +49,18 @@ export default function SolveProblem() {
     const solvedProblems = JSON.parse(localStorage.getItem("solvedProblems") || "[]");
     setIsSolved(solvedProblems.includes(problemId));
   }, [problemId]);
+
+  // Reset code editor and state when problem changes
+  useEffect(() => {
+    // Reset to default code for the current language
+    setCode(LANGUAGES[language].defaultCode);
+    // Clear output
+    setOutput(null);
+    // Reset violation states
+    setViolationCount(0);
+    setHasViolation(false);
+    setIsSubmitted(false);
+  }, [problemId, language]);
 
   // Get next unsolved problem
   const getNextProblem = () => {
@@ -160,13 +172,13 @@ export default function SolveProblem() {
   const handleSubmit = () => {
     // If there were violations, submit with 0 marks
     const finalScore = hasViolation ? 0 : (problem?.marks || 0);
-    
+
     submitCode.mutate(
       { code, language, problemId },
       {
         onSuccess: () => {
           setIsSubmitted(true);
-          
+
           // Mark problem as solved in localStorage
           const solvedProblems = JSON.parse(localStorage.getItem("solvedProblems") || "[]");
           if (!solvedProblems.includes(problemId)) {
@@ -218,10 +230,10 @@ export default function SolveProblem() {
   const ProblemContent = () => (
     <div className="prose prose-invert prose-sm max-w-none prose-headings:font-display prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-code:text-primary">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{problem.description}</ReactMarkdown>
-      
+
       <h3 className="mt-6 text-lg font-semibold text-foreground">Constraints</h3>
       <ReactMarkdown>{problem.constraints}</ReactMarkdown>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
         <div className="bg-card p-4 rounded-lg border border-border">
           <h4 className="text-sm font-mono text-muted-foreground mb-2">Sample Input</h4>
@@ -260,7 +272,7 @@ export default function SolveProblem() {
         </div>
         <ScrollArea className="flex-1 p-4 font-mono text-sm">
           {!output && <p className="text-muted-foreground/50 italic">Run code to see output...</p>}
-          
+
           {output && output.status === "error" && (
             <div className="text-red-400 whitespace-pre-wrap">{output.results[0]?.error || output.message}</div>
           )}
@@ -277,7 +289,7 @@ export default function SolveProblem() {
                     )}
                     <span className="text-xs text-muted-foreground">Test Case {i + 1} {result.isHidden && "(Hidden)"}</span>
                   </div>
-                  
+
                   {!result.passed && !result.isHidden && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mt-2">
                       <div>
@@ -315,14 +327,14 @@ export default function SolveProblem() {
           <div className="flex gap-1 sm:gap-2 shrink-0">
             {isSolved && (
               <Badge className="bg-green-600 text-white border-0 text-xs">
-                <CheckCircle className="w-3 h-3 mr-1 hidden sm:inline" /> 
+                <CheckCircle className="w-3 h-3 mr-1 hidden sm:inline" />
                 <span className="sm:hidden">✓</span>
                 <span className="hidden sm:inline">Solved</span>
               </Badge>
             )}
             {hasViolation && !isSubmitted && (
               <Badge variant="destructive" className="animate-pulse text-xs">
-                <AlertTriangle className="w-3 h-3 mr-1 hidden sm:inline" /> 
+                <AlertTriangle className="w-3 h-3 mr-1 hidden sm:inline" />
                 <span className="sm:hidden">0</span>
                 <span className="hidden sm:inline">0 Marks</span>
               </Badge>
@@ -346,10 +358,10 @@ export default function SolveProblem() {
             </SelectContent>
           </Select>
 
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            onClick={handleRun} 
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={handleRun}
             disabled={runCode.isPending || isSubmitted}
             className="h-8 text-xs sm:text-sm px-2 sm:px-3"
           >
@@ -358,9 +370,9 @@ export default function SolveProblem() {
           </Button>
 
           {!isSolved ? (
-            <Button 
-              size="sm" 
-              onClick={handleSubmit} 
+            <Button
+              size="sm"
+              onClick={handleSubmit}
               disabled={submitCode.isPending || (output?.status !== "pass") || isSubmitted}
               className={clsx("h-8 text-xs sm:text-sm px-2 sm:px-3 transition-all", output?.status === "pass" ? "bg-primary hover:bg-primary/90" : "bg-muted text-muted-foreground")}
             >
@@ -368,8 +380,8 @@ export default function SolveProblem() {
               <span className="hidden sm:inline">Submit</span>
             </Button>
           ) : (
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               onClick={handleNextProblem}
               className="h-8 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-2 sm:px-3"
             >
@@ -392,7 +404,7 @@ export default function SolveProblem() {
               <ProblemContent />
             </ScrollArea>
           </ResizablePanel>
-          
+
           <ResizableHandle withHandle className="bg-border" />
 
           {/* Right Panel: Editor & Output */}
@@ -427,7 +439,7 @@ export default function SolveProblem() {
                   </div>
                   <ScrollArea className="flex-1 p-4 font-mono text-sm">
                     {!output && <p className="text-muted-foreground/50 italic">Run code to see output...</p>}
-                    
+
                     {output && output.status === "error" && (
                       <div className="text-red-400 whitespace-pre-wrap">{output.results[0]?.error || output.message}</div>
                     )}
@@ -444,7 +456,7 @@ export default function SolveProblem() {
                               )}
                               <span className="text-xs text-muted-foreground">Test Case {i + 1} {result.isHidden && "(Hidden)"}</span>
                             </div>
-                            
+
                             {!result.passed && !result.isHidden && (
                               <div className="grid grid-cols-2 gap-2 text-xs mt-2">
                                 <div>
@@ -484,13 +496,13 @@ export default function SolveProblem() {
               <Code className="w-4 h-4 mr-2" /> Code
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="problem" className="flex-1 m-0 overflow-hidden data-[state=active]:flex">
             <ScrollArea className="h-full p-4">
               <ProblemContent />
             </ScrollArea>
           </TabsContent>
-          
+
           <TabsContent value="editor" className="flex-1 m-0 overflow-hidden p-0 data-[state=active]:flex">
             <EditorContent />
           </TabsContent>
