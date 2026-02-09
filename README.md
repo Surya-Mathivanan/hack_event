@@ -187,31 +187,54 @@ npm start
 
 ```
 Secure-Web-Code/
-├── client/                 # Frontend React application
+├── client/                     # Frontend React application
+│   ├── public/                 # Static assets
 │   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── hooks/         # Custom hooks
-│   │   ├── pages/         # Route pages
-│   │   ├── lib/           # Utilities
-│   │   └── App.tsx        # Main app
-│   └── index.html
+│   │   ├── components/        # Reusable UI components
+│   │   │   └── ui/            # Shadcn UI components
+│   │   ├── hooks/             # Custom React hooks
+│   │   ├── lib/               # Utility functions & configs
+│   │   ├── pages/             # Application pages
+│   │   ├── App.tsx            # Main application component
+│   │   ├── index.css          # Global styles
+│   │   └── main.tsx           # Entry point
+│   ├── index.html             # HTML template
+│   └── vite.config.ts         # Vite configuration
 │
-├── server/                # Backend Express application
-│   ├── auth/             # Google OAuth authentication
-│   │   ├── googleAuth.ts # OAuth strategy
-│   │   ├── storage.ts    # User storage
-│   │   └── routes.ts     # Auth routes
-│   ├── db.ts             # Database connection
-│   ├── index.ts          # Server entry point
-│   ├── routes.ts         # API routes
-│   └── storage.ts        # Database operations
+├── server/                     # Backend Express application
+│   ├── auth/                  # Authentication module
+│   │   ├── googleAuth.ts      # Google OAuth strategy configuration
+│   │   ├── routes.ts          # Auth-specific routes
+│   │   └── storage.ts         # Auth-related database storage
+│   ├── db.ts                  # Database connection setup
+│   ├── index.ts               # Server entry point & configuration
+│   ├── piston.ts              # Code execution engine integration
+│   ├── routes.ts              # Main API routes definition
+│   ├── socket.ts              # Socket.IO configuration
+│   ├── static.ts              # Static file serving middleware
+│   ├── storage.ts             # Main database operations (CRUD)
+│   └── vite.ts                # Vite middleware integration
 │
-├── shared/               # Shared TypeScript code
-│   ├── models/          # Data models
-│   └── schema.ts        # Database schema
+├── shared/                     # Shared code between client & server
+│   └── schema.ts              # Database schema & Zod types
 │
-├── .env                 # Environment variables
-└── package.json         # Dependencies
+├── script/                     # maintainance scripts
+│   └── build.ts               # Build script
+│
+├── dist/                       # Production build artifacts
+│   ├── index.cjs              # Compiled server code
+│   └── public/                # Compiled frontend assets
+│
+├── .env                        # Environment variables
+├── .gitignore                 # Git ignore rules
+├── DEPLOYMENT_GUIDE.md        # Deployment instructions
+├── drizzle.config.ts          # Drizzle ORM configuration
+├── package.json               # Project dependencies & scripts
+├── postcss.config.js          # PostCSS configuration
+├── tailwind.config.ts         # Tailwind CSS configuration
+├── tsconfig.json              # TypeScript configuration
+├── vercel.json                # Vercel deployment configuration
+└── README.md                  # Project documentation
 ```
 
 ---
