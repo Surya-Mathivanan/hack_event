@@ -20,7 +20,7 @@ async function fetchUser(): Promise<User | null> {
 }
 
 async function logout(): Promise<void> {
-  window.location.href = "/api/auth/logout";
+  window.location.href = `${API_BASE_URL}/api/auth/logout`;
 }
 
 export function useAuth() {
