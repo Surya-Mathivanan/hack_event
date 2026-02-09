@@ -3,7 +3,7 @@ import { useProblems, useCreateProblem, useDeleteProblem } from "@/hooks/use-pro
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertProblemSchema, insertTestCaseSchema, type Problem, type User } from "../shared/schema";
+import { insertProblemSchema, insertTestCaseSchema, type Problem, type User } from "../shared/types";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";

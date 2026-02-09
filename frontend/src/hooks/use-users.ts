@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { User } from "../shared/schema";
+import { User } from "../shared/types";
 import { useToast } from "@/hooks/use-toast";
 
 export function useUsers() {

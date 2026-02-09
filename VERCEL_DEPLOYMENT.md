@@ -41,7 +41,7 @@ cd frontend
 vercel
 
 # For production deployment
-vercel --prod
+
 ```
 
 ### Option 2: GitHub Integration (Recommended)

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "../shared/routes";
-import { type InsertProblem, type Problem, type TestCase } from "../shared/schema";
+import { type InsertProblem, type Problem, type TestCase } from "../shared/types";
 import { useToast } from "@/hooks/use-toast";
 
 export function useProblems() {
@@ -40,7 +40,7 @@ export function useCreateProblem() {
         body: JSON.stringify(data),
         credentials: "include",
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.message || "Failed to create problem");
@@ -64,11 +64,11 @@ export function useDeleteProblem() {
   return useMutation({
     mutationFn: async (id: number) => {
       const url = buildUrl(api.problems.delete.path, { id });
-      const res = await fetch(url, { 
+      const res = await fetch(url, {
         method: api.problems.delete.method,
-        credentials: "include" 
+        credentials: "include"
       });
-      
+
       if (!res.ok) throw new Error("Failed to delete problem");
     },
     onSuccess: () => {

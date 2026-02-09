@@ -21,5 +21,19 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+    rollupOptions: {
+      external: [
+        'drizzle-orm',
+        'drizzle-orm/pg-core',
+        'drizzle-zod'
+      ],
+      onwarn(warning, warn) {
+        // Suppress warnings about drizzle-orm imports
+        if (warning.code === 'UNRESOLVED_IMPORT' && warning.message.includes('drizzle')) {
+          return;
+        }
+        warn(warning);
+      }
+    }
   },
 });
