@@ -2,11 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "../shared/types";
 import { useToast } from "@/hooks/use-toast";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
 export function useUsers() {
     return useQuery<User[]>({
         queryKey: ["/api/users"],
         queryFn: async () => {
-            const res = await fetch("/api/users", { credentials: "include" });
+            const res = await fetch(`${API_BASE_URL}/api/users`, { credentials: "include" });
             if (!res.ok) throw new Error("Failed to fetch users");
             return res.json();
         }
@@ -19,7 +21,7 @@ export function useDeleteUser() {
 
     return useMutation({
         mutationFn: async (userId: string) => {
-            const res = await fetch(`/api/users/${userId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
                 method: "DELETE",
                 credentials: "include"
             });

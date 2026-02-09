@@ -13,7 +13,8 @@ export default function Landing() {
   const { toast } = useToast();
 
   const handleLogin = () => {
-    window.location.href = "/api/auth/google";
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    window.location.href = `${apiBaseUrl}/api/auth/google`;
   };
 
   const handleAdminLogin = async (e: React.FormEvent) => {
@@ -21,7 +22,8 @@ export default function Landing() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/admin/login", {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+      const response = await fetch(`${apiBaseUrl}/api/auth/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

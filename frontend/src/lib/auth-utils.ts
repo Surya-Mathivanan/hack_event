@@ -12,6 +12,7 @@ export function redirectToLogin(toast?: (options: { title: string; description: 
     });
   }
   setTimeout(() => {
-    window.location.href = "/api/auth/google";
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    window.location.href = `${apiBaseUrl}/api/auth/google`;
   }, 500);
 }
