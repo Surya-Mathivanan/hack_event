@@ -63,6 +63,9 @@ export async function executeCodeWithPiston(
 
         const result = response.data;
 
+        // Log the full response for debugging
+        console.log('Piston API Response:', JSON.stringify(result, null, 2));
+
         // Check if compilation failed (for C/C++)
         if (result.compile && result.compile.code !== 0) {
             return {
@@ -73,8 +76,10 @@ export async function executeCodeWithPiston(
 
         // Check if execution succeeded
         if (result.run.code === 0) {
+            const stdout = result.run.stdout || "";
+            console.log('Execution successful. Output:', stdout);
             return {
-                output: result.run.stdout.trim(),
+                output: stdout.trim(),
             };
         } else {
             // Runtime error

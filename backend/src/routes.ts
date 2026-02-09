@@ -128,14 +128,28 @@ export async function registerRoutes(
 
     for (const tc of testCases) {
       const { output, error } = await executeCodeWithPiston(language, code, tc.input);
-      const passed = !error && output === tc.expectedOutput.trim();
+
+      // Normalize outputs for comparison (trim whitespace and newlines)
+      const normalizedOutput = output.trim();
+      const normalizedExpected = tc.expectedOutput.trim();
+
+      const passed = !error && normalizedOutput === normalizedExpected;
       if (!passed) allPassed = false;
+
+      // Log for debugging
+      console.log(`Test Case ${tc.id}:`, {
+        passed,
+        input: tc.input,
+        expected: normalizedExpected,
+        actual: normalizedOutput,
+        error
+      });
 
       results.push({
         passed,
         input: tc.isHidden ? "Hidden" : tc.input,
-        expectedOutput: tc.isHidden ? "Hidden" : tc.expectedOutput,
-        actualOutput: tc.isHidden ? (passed ? "Hidden" : "Incorrect") : output, // Don't reveal hidden output if failed
+        expectedOutput: tc.isHidden ? "Hidden" : normalizedExpected,
+        actualOutput: tc.isHidden ? (passed ? "Hidden" : "Incorrect") : normalizedOutput,
         isHidden: tc.isHidden,
         error
       });
