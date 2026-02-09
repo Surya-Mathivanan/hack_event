@@ -67,7 +67,7 @@ vercel
 
 4. **Add Environment Variables**
    - Click "Environment Variables"
-   - Add: `VITE_API_BASE_URL` = `https://hack-event.onrender.com`
+   - Add: ` ` = `https://hack-event.onrender.com`
    - Click "Add"
 
 5. **Deploy**

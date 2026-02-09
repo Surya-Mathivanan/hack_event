@@ -1,6 +1,11 @@
 import { z } from 'zod';
-import { insertProblemSchema, insertTestCaseSchema, insertSubmissionSchema, problems, testCases, submissions, users } from './schema';
-import { updateUserSchema } from './models/auth';
+import { insertProblemSchema, insertTestCaseSchema, type Problem, type TestCase, type Submission, type User } from './types';
+
+// Update user schema (moved from models/auth)
+export const updateUserSchema = z.object({
+  username: z.string().min(1).optional(),
+  profileImageUrl: z.string().url().nullable().optional(),
+});
 
 export const errorSchemas = {
   validation: z.object({
@@ -25,7 +30,7 @@ export const api = {
       path: '/api/profile' as const,
       input: updateUserSchema,
       responses: {
-        200: z.custom<typeof users.$inferSelect>(),
+        200: z.custom<User>(),
         400: errorSchemas.validation,
       },
     },
@@ -35,14 +40,14 @@ export const api = {
       method: 'GET' as const,
       path: '/api/problems' as const,
       responses: {
-        200: z.array(z.custom<typeof problems.$inferSelect>()),
+        200: z.array(z.custom<Problem>()),
       },
     },
     get: {
       method: 'GET' as const,
       path: '/api/problems/:id' as const,
       responses: {
-        200: z.custom<typeof problems.$inferSelect & { testCases: typeof testCases.$inferSelect[] }>(),
+        200: z.custom<Problem & { testCases: TestCase[] }>(),
         404: errorSchemas.notFound,
       },
     },
@@ -53,7 +58,7 @@ export const api = {
         testCases: z.array(insertTestCaseSchema.omit({ problemId: true })),
       }),
       responses: {
-        201: z.custom<typeof problems.$inferSelect>(),
+        201: z.custom<Problem>(),
         403: errorSchemas.forbidden,
         400: errorSchemas.validation,
       },
@@ -65,7 +70,7 @@ export const api = {
         testCases: z.array(insertTestCaseSchema.omit({ problemId: true })).optional(),
       }),
       responses: {
-        200: z.custom<typeof problems.$inferSelect>(),
+        200: z.custom<Problem>(),
         403: errorSchemas.forbidden,
         404: errorSchemas.notFound,
       },
@@ -113,7 +118,7 @@ export const api = {
         problemId: z.number(),
       }),
       responses: {
-        201: z.custom<typeof submissions.$inferSelect>(),
+        201: z.custom<Submission>(),
         400: z.object({ message: z.string() }), // Failed test cases
         404: errorSchemas.notFound,
       },
@@ -122,7 +127,7 @@ export const api = {
       method: 'GET' as const,
       path: '/api/submissions' as const,
       responses: {
-        200: z.array(z.custom<typeof submissions.$inferSelect & { problemTitle: string }>()),
+        200: z.array(z.custom<Submission & { problemTitle: string }>()),
       },
     },
   },
