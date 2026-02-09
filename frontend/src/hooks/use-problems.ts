@@ -2,13 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "../shared/routes";
 import { type InsertProblem, type Problem, type TestCase } from "../shared/types";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, getUrl } from "../lib/queryClient";
 
 export function useProblems() {
   return useQuery({
     queryKey: [api.problems.list.path],
     queryFn: async () => {
-      const res = await fetch(api.problems.list.path, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch problems");
+      const res = await apiRequest('GET', api.problems.list.path);
       return api.problems.list.responses[200].parse(await res.json());
     },
   });
@@ -19,7 +19,7 @@ export function useProblem(id: number) {
     queryKey: [api.problems.get.path, id],
     queryFn: async () => {
       const url = buildUrl(api.problems.get.path, { id });
-      const res = await fetch(url, { credentials: "include" });
+      const res = await fetch(getUrl(url), { credentials: "include" });
       if (res.status === 404) return null;
       if (!res.ok) throw new Error("Failed to fetch problem");
       return api.problems.get.responses[200].parse(await res.json());
@@ -34,17 +34,12 @@ export function useCreateProblem() {
 
   return useMutation({
     mutationFn: async (data: InsertProblem & { testCases: Omit<TestCase, "id" | "problemId">[] }) => {
-      const res = await fetch(api.problems.create.path, {
-        method: api.problems.create.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-        credentials: "include",
-      });
+      const res = await apiRequest(
+        api.problems.create.method,
+        api.problems.create.path,
+        data
+      );
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to create problem");
-      }
       return api.problems.create.responses[201].parse(await res.json());
     },
     onSuccess: () => {
@@ -64,7 +59,7 @@ export function useDeleteProblem() {
   return useMutation({
     mutationFn: async (id: number) => {
       const url = buildUrl(api.problems.delete.path, { id });
-      const res = await fetch(url, {
+      const res = await fetch(getUrl(url), {
         method: api.problems.delete.method,
         credentials: "include"
       });
