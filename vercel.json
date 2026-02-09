@@ -1,8 +1,11 @@
 {
-  "projects": [
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "frontend",
-      "framework": "vite"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
