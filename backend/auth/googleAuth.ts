@@ -16,6 +16,8 @@ export function getSession() {
         tableName: "sessions",
     });
 
+    const isProduction = process.env.NODE_ENV === "production";
+    
     return session({
         secret: process.env.SESSION_SECRET!,
         store: sessionStore,
@@ -23,9 +25,14 @@ export function getSession() {
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            // In production: require secure (https), in dev allow http
+            secure: isProduction,
+            // sameSite: "none" requires secure: true and should only be used for cross-origin cookies
+            // Use "lax" for same-site requests (more compatible), "none" only for cross-origin needs
+            sameSite: isProduction ? "none" : "lax",
             maxAge: sessionTtl,
+            // Add domain specification for better cross-device compatibility in production
+            domain: isProduction ? undefined : undefined, // Let browser detect
         },
     });
 }

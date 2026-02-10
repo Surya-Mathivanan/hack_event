@@ -14,14 +14,20 @@ declare module "http" {
   }
 }
 
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  }),
-);
+// Enhanced CORS configuration for better cross-device compatibility
+const corsOptions = {
+  // Allow requests from any origin in development, specific origins in production
+  origin: process.env.NODE_ENV === "production" 
+    ? (process.env.CORS_ORIGIN || "").split(",").map(o => o.trim())
+    : true, // Allow all origins in development
+  credentials: true, // Include credentials (cookies, session)
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  optionsSuccessStatus: 200, // For legacy browsers
+  maxAge: 86400, // Cache preflight requests for 24 hours
+};
+
+app.use(cors(corsOptions));
 
 app.use(
   express.json({

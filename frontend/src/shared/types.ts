@@ -80,8 +80,8 @@ export type InsertSubmission = z.infer<typeof insertSubmissionSchema>;
 
 // === REQUEST TYPES ===
 
-export type CreateProblemRequest = InsertProblem & { 
-  testCases: Omit<InsertTestCase, "problemId">[] 
+export type CreateProblemRequest = InsertProblem & {
+  testCases: Omit<InsertTestCase, "problemId">[]
 };
 
 export type RunCodeRequest = {

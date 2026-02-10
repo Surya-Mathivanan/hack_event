@@ -1,34 +1,55 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { User } from "../shared/types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+// Smart API URL detection
+function getApiBaseUrl(): string {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl) return envUrl;
+  
+  if (import.meta.env.DEV) {
+    return "http://localhost:3000";
+  }
+  
+  return window.location.origin;
+}
 
 async function fetchUser(): Promise<User | null> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/user`, {
-    credentials: "include",
-  });
+  try {
+    const apiBaseUrl = getApiBaseUrl();
+    const response = await fetch(`${apiBaseUrl}/api/auth/user`, {
+      credentials: "include",
+    });
 
-  if (response.status === 401) {
-    return null;
+    if (response.status === 401) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`${response.status}: ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof TypeError) {
+      if (error.message.includes("fetch")) {
+        throw new Error("Network Error: Unable to reach backend");
+      }
+    }
+    throw error;
   }
-
-  if (!response.ok) {
-    throw new Error(`${response.status}: ${response.statusText}`);
-  }
-
-  return response.json();
 }
 
 async function logout(): Promise<void> {
-  window.location.href = `${API_BASE_URL}/api/auth/logout`;
+  const apiBaseUrl = getApiBaseUrl();
+  window.location.href = `${apiBaseUrl}/api/auth/logout`;
 }
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const { data: user, isLoading } = useQuery<User | null>({
+  const { data: user, isLoading, error } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
     queryFn: fetchUser,
-    retry: false,
+    retry: 1,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
@@ -42,6 +63,7 @@ export function useAuth() {
   return {
     user,
     isLoading,
+    error,
     isAuthenticated: !!user,
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,

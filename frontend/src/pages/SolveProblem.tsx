@@ -3,6 +3,7 @@ import { useParams, useLocation } from "wouter";
 import { useProblem, useProblems } from "@/hooks/use-problems";
 import { useRunCode, useSubmitCode } from "@/hooks/use-submissions";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import Editor from "@monaco-editor/react";
@@ -32,6 +33,7 @@ export default function SolveProblem() {
   const { data: allProblems } = useProblems();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const [language, setLanguage] = useState<"python" | "c" | "cpp" | "java">("python");
   const [code, setCode] = useState(LANGUAGES.python.defaultCode);
@@ -70,9 +72,32 @@ export default function SolveProblem() {
     return unsolved.length > 0 ? unsolved[0] : null;
   };
 
-  // === SECURITY ENFORCEMENT ===
+  // === SECURITY ENFORCEMENT (Desktop Only) ===
+  // On mobile, we skip fullscreen enforcement as it interferes with text input
   useEffect(() => {
-    // 1. Request Fullscreen
+    if (isMobile) {
+      // Mobile: Only track tab switching, don't enforce fullscreen
+      const handleVisibilityChange = () => {
+        if (document.hidden && !isSubmitted) {
+          setViolationCount(prev => prev + 1);
+          setHasViolation(true);
+          toast({
+            title: "⚠️ VIOLATION: APP MINIMIZED",
+            description: `Warning ${violationCount + 1}/3: Stay focused on the exam.`,
+            variant: "destructive",
+            duration: 5000,
+          });
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+      };
+    }
+
+    // Desktop: Full security enforcement with fullscreen
     const enterFullScreen = async () => {
       try {
         if (!document.fullscreenElement) {
@@ -117,18 +142,30 @@ export default function SolveProblem() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
 
-    // 4. Disable Context Menu
-    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    // 4. Disable Context Menu (except for editor - let Monaco handle it)
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      // Allow context menu in Monaco editor
+      if (!target.closest(".monaco-editor")) {
+        e.preventDefault();
+      }
+    };
     document.addEventListener("contextmenu", handleContextMenu);
 
-    // 5. Disable Copy/Paste
+    // 5. Disable Copy/Paste only outside editor
     const handleCopy = (e: ClipboardEvent) => {
-      e.preventDefault();
-      toast({ title: "Copy disabled", variant: "destructive" });
+      const target = e.target as HTMLElement;
+      if (!target.closest(".monaco-editor") && !target.closest("[contenteditable]")) {
+        e.preventDefault();
+        toast({ title: "Copy disabled outside editor", variant: "destructive", duration: 2000 });
+      }
     };
     const handlePaste = (e: ClipboardEvent) => {
-      e.preventDefault();
-      toast({ title: "Paste disabled", variant: "destructive" });
+      const target = e.target as HTMLElement;
+      if (!target.closest(".monaco-editor") && !target.closest("[contenteditable]")) {
+        e.preventDefault();
+        toast({ title: "Paste disabled outside editor", variant: "destructive", duration: 2000 });
+      }
     };
     document.addEventListener("copy", handleCopy);
     document.addEventListener("paste", handlePaste);
@@ -141,7 +178,7 @@ export default function SolveProblem() {
       document.removeEventListener("copy", handleCopy);
       document.removeEventListener("paste", handlePaste);
     };
-  }, [toast, violationCount, isSubmitted]);
+  }, [toast, violationCount, isSubmitted, isMobile]);
 
   if (isLoading || !problem) {
     return (
